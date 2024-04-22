@@ -1,7 +1,6 @@
 # Statistical Jump Models (JMs)
 
-**Developer**: Yizhan Shu
-GitHub: [@Yizhan-Oliver-Shu](https://github.com/Yizhan-Oliver-Shu)  
+**Developer**: Yizhan Shu   ([@Yizhan-Oliver-Shu](https://github.com/Yizhan-Oliver-Shu))
 Email: yizhans@princeton.edu
 
 **Author**: Yizhan Shu, Onat Aydınhan ([Linkedin](https://www.linkedin.com/in/af%C5%9Far-onat-ayd%C4%B1nhan-ph-d-940ba7142/)) and Chenyu Yu [@chenyu-yu](https://github.com/chenyu-yu).
