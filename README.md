@@ -119,7 +119,7 @@ If any of them assist your research, please cite the corresponding paper.
 ```bibtex
 @article{nystrup2021SJM,
     title     = {Feature selection in jump models},
-    author    = {Peter Nystrup and Petter N. Kolm and Erik Lindström},
+    author    = {Peter Nystrup and Petter N. Kolm and Erik Lindstr{\"o}m},
     journal   = {Expert Systems with Applications},
     volume    = {184},
     pages     = {115558},
@@ -153,7 +153,6 @@ If any of them assist your research, please cite the corresponding paper.
 - **Downside Risk Recution**: Shu, Y., Yu, C., and Mulvey, J. M. (2024a). Downside risk reduction using regime-switching signals: A statistical jump model approach. *Journal of Asset Management*. To appear. [[journal](https://link.springer.com/article/10.1057/s41260-024-00376-x)] [[SSRN](https://ssrn.com/abstract=4719989)]
 
 
-
 ```bibtex
 @article{Shu2024downside,
     title   = {Downside Risk Reduction Using Regime-Switching Signals: A Statistical Jump Model Approach},
@@ -166,7 +165,9 @@ If any of them assist your research, please cite the corresponding paper.
 ```
 
 
-- **Dynamic Asset Allocation**: Shu, Y., Yu, C., and Mulvey, J. M. (2024b). Dynamic asset allocation with asset-specific regime forecasts. *Annals of Operations Research*. To appear. [[journal](add later)] [[SSRN](https://ssrn.com/abstract=4864358)]
+
+
+- **Dynamic Asset Allocation**: Shu, Y., Yu, C., and Mulvey, J. M. (2024b). Dynamic asset allocation with asset-specific regime forecasts. *Annals of Operations Research*. To appear. [[journal](https://link.springer.com/article/10.1007/s10479-024-06266-0)] [[SSRN](https://ssrn.com/abstract=4864358)]
 
 ```bibtex
 @article{Shu2024DAA,
