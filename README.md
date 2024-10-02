@@ -30,7 +30,7 @@ The library follows a [`scikit-learn`](https://github.com/scikit-learn/scikit-le
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install:
 
 ```bash
-pip install ???
+pip install jumpmodels
 ```
 
 `jumpmodels` has the following dependencies:

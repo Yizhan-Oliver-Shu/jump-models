@@ -7,7 +7,6 @@ is already saved in `example/Nasdaq/data/`.
 """
 
 from utils_dir import *
-
 include_home_dir()
 
 import numpy as np
@@ -20,7 +19,7 @@ TICKER = "NDX"   # Nasdaq-100 Index
 
 def get_data():
     # download closing prices
-    close: pd.Series = yf.download("^"+TICKER)['Close']
+    close: pd.Series = yf.download("^"+TICKER, start="1985-10-01", end="2024-09-30")['Close']
     # convert to ret
     ret = close.pct_change()
     # concat as df
