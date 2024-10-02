@@ -1,45 +1,113 @@
 """
-module for sparse jump model estimation
+Module for Sparse Jump Models (SJMs).
+
+This module provides an implementation of sparse jump models, extending the jump model 
+with additional support for feature selection through Lasso-like optimization.
+
+Depends on
+----------
+utils/ : Modules
+    Utility functions for validation and clustering operations.
+jump : Module
+    Discrete and continuous jump models.
 """
 
 from .utils import *
 from .jump import *
+
 from numpy.linalg import norm
 
-############################
-## lasso problem for w
-############################
+########################################################
+## Lasso Problem for Feature Weights
+########################################################
 
 # reviewed
-def binary_search_decrease(func, left: float, right: float, value: float,  *args, tol=1e-6, max_iter=100, **kwargs):
+def binary_search_decrease(func, 
+                           left: float, 
+                           right: float, 
+                           value: float, 
+                           *args, 
+                           tol_x: float = 1e-8, 
+                           tol_y: float = 0., 
+                           max_iter: int = 100, 
+                           verbose: int = 0,
+                           **kwargs) -> float:
     """
-    binary search for a decreasing function.
+    Binary search for a decreasing function.
+
+    This method performs binary search to find the point where the function `func` 
+    decreases to a specified value within given tolerances.
+
+    Parameters
+    ----------
+    func : callable
+        The function to be minimized.
+    
+    left : float
+        The left bound for the search.
+
+    right : float
+        The right bound for the search.
+
+    value : float
+        The target value to find.
+
+    tol_x : float, optional (default=1e-8)
+        The tolerance for the search along the x-axis.
+
+    tol_y : float, optional (default=0.)
+        The tolerance for the search along the y-axis (function value).
+
+    max_iter : int, optional (default=100)
+        Maximum number of iterations.
+
+    verbose : int, optional (default=0)
+        Verbosity level. If greater than 0, prints progress information.
+
+    Returns
+    -------
+    float
+        The optimal point where the function reaches the target value.
     """
     if value >= func(left): return left
     if value <= func(right): return right
     # 
     gap = right-left
     num_iter = 0
-    while (gap > tol and num_iter < max_iter):
+    while (gap > tol_x and num_iter < max_iter):
         # print(f"{left}, {right}")
         num_iter += 1
         middle = (right + left) / 2
         func_call = func(middle, *args, **kwargs)
-        if func_call < value:
+        if verbose: print("x value", middle, "y value", func_call)
+        if func_call < value-tol_y/2:
             right = middle
-        elif func_call > value:
+        elif func_call > value+tol_y/2:
             left = middle
         else:
             return middle
         gap /= 2
     if num_iter < max_iter:
         return middle
-    raise Exception("None convergence. must be math error.")
+    raise Exception("Non-convergence: Possible mathematical error.")
     
 # reviewed
 def soft_thres_l2_normalized(x: SER_ARR_TYPE, thres: float = 0.) -> SER_ARR_TYPE:
     """
-    soft thresholding for a (nonneg) vec x. normalize to to have unit length.
+    Soft thresholding for a non-negative vector `x`, followed by L2 normalization.
+
+    Parameters
+    ----------
+    x : Series or ndarray
+        The input vector to be thresholded and normalized.
+
+    thres : float, optional (default=0.)
+        The threshold for soft thresholding.
+
+    Returns
+    -------
+    Series or ndarray
+        The thresholded and L2-normalized vector.
     """
     y = np.maximum(0, x-thres)
     y_norm = norm(y)
@@ -47,29 +115,83 @@ def soft_thres_l2_normalized(x: SER_ARR_TYPE, thres: float = 0.) -> SER_ARR_TYPE
     return y / y_norm
 
 # reviewed
-def solve_lasso(a: SER_ARR_TYPE, s: float):
+def solve_lasso(a: SER_ARR_TYPE, 
+                norm_ub: float, 
+                tol: float = 1e-8) -> SER_ARR_TYPE:
     """
-    solve the lasso problem involved in updating the feature weight vector.
+    Solve the Lasso problem for feature weights.
+
+    This function finds the optimal feature weights subject to the constraint that the 
+    L1-norm of the weights is bounded by `norm_ub`.
+
+    Parameters
+    ----------
+    a : Series or ndarray
+        The input vector for the Lasso problem.
+
+    norm_ub : float
+        The upper bound for the L1-norm of the feature weights. 
+        Equals to `kappa` in the published articles.
+
+    tol : float, optional (default=1e-8)
+        The tolerance for the binary search.
+
+    Returns
+    -------
+    Series or ndarray
+        The optimized feature weights.
     """
-    assert s >= 1.
+    assert norm_ub >= 1.
     a_arr = check_1d_array(a)
     left, right = 0., np.unique(a_arr)[-2]  # right is the second largest element of `a`
-    if right < 1e-6: thres_sol = 0.
+    if right < tol: thres_sol = 0.
     else:
         func = lambda thres: soft_thres_l2_normalized(a_arr, thres).sum()
-        thres_sol = binary_search_decrease(func, left, right, s)
+        thres_sol = binary_search_decrease(func, left, right, norm_ub, tol_x=tol)
+    # return thres_sol
     w = soft_thres_l2_normalized(a_arr, thres_sol)
-    return raise_arr_to_pd_obj(w, a)    #w if not is_ser_df(a) else pd.Series(w, index=a.index)
+    return raise_arr_to_pd_obj(w, a)
 
 # reviewed
-def compute_BCSS(X: DF_ARR_TYPE, proba_: DF_ARR_TYPE, centers_: np.ndarray = None) -> SER_ARR_TYPE:
+def compute_BCSS(X: DF_ARR_TYPE, 
+                 proba_: DF_ARR_TYPE, 
+                 centers_: Optional[np.ndarray] = None,
+                 tol: float = 1e-6) -> SER_ARR_TYPE:
     """
-    compute the between cluster sum of squares.
+    Compute the Between Cluster Sum of Squares (BCSS).
+
+    The BCSS is computed based on the cluster centers and probabilities. If no centers are provided, 
+    they will be computed from probabilities. Any BCSS values below the tolerance are set to zero.
+
+    Parameters
+    ----------
+    X : DataFrame or ndarray
+        The input data matrix.
+
+    proba_ : DataFrame or ndarray
+        The cluster assignment probabilities.
+
+    centers_ : ndarray, optional
+        The cluster centers. NA values are acceptable.
+        If not provided, they are estimated from the data.
+
+    tol : float, optional (default=1e-6)
+        The tolerance for setting BCSS values to zero.
+
+    Returns
+    -------
+    Series or ndarray
+        The BCSS values for each feature.
     """
     X_arr, proba_arr = check_2d_array(X), check_2d_array(proba_)
-    if centers_ is None: centers_ = weighted_mean_cluster(X_arr, proba_arr, fill_na_mean=None)
-    BCSS = proba_arr.sum(axis=0) @ ((centers_ - X_arr.mean(axis=0))**2)
-    valid_no_nan(BCSS)
+    if centers_ is None: centers_ = weighted_mean_cluster(X_arr, proba_arr)
+    # replace NAs in centers with 0. won't affect computation
+    centers_ = np.nan_to_num(centers_, nan=0.)
+    # assert not np.isnan(centers_).any()
+    Ns = proba_arr.sum(axis=0)
+    BCSS = Ns @ ((centers_ - X_arr.mean(axis=0))**2)
+    BCSS = set_zero_arr(BCSS, tol=tol)
+    assert not np.isnan(BCSS).any()
     return raise_arr_to_pd_obj(BCSS, X, index_key="columns")
 
 ############################
@@ -78,139 +200,226 @@ def compute_BCSS(X: DF_ARR_TYPE, proba_: DF_ARR_TYPE, centers_: np.ndarray = Non
 
 class SparseJumpModel(BaseEstimator):
     """
-    class for SJM implementation
+    Sparse Jump Model (SJM) with feature selection.
+
+    This model extends the standard jump model by incorporating a Lasso-like feature 
+    selection process, where the number of selected features is controlled by `max_feats`.
+
+    Parameters
+    ----------
+    n_components : int, default=2
+        Number of components (clusters).
+
+    max_feats : float, default=100.
+        Controls the number of features included. This is the square of `kappa`, and 
+        represents the effective number of features.
+
+    jump_penalty : float, default=0.
+        The jump penalty. In SJM, this penalty is scaled by 
+        `1 / sqrt(n_features)` since features are weighted.
+
+    cont : bool, default=False
+        If `True`, the continuous jump model is used. Otherwise, the discrete model is applied.
+
+    grid_size : float, default=0.05
+        The grid size for discretizing the probability simplex (only used for continuous models).
+
+    mode_loss : bool, default=True
+        Whether to apply the mode loss penalty (only relevant for continuous models).
+
+    random_state : int or RandomState, optional
+        Random number generator seed for reproducibility.
+
+    max_iter : int, default=30
+        Maximum number of iterations for the coordinate descent algorithm in feature selection.
+
+    tol_w : float, default=1e-4
+        Tolerance for stopping the optimization of feature weights.
+
+    max_iter_jm : int, default=1000
+        Maximum number of iterations for the jump model fitting process.
+
+    tol_jm : float, default=1e-8
+        Stopping tolerance for the jump model fitting.
+
+    n_init_jm : int, default=20
+        Number of initializations for the jump model.
+
+    verbose : int, default=0
+        Controls the verbosity of the output.
+
+    Attributes
+    ----------
+    jm_ins : JumpModel
+        The fitted jump model instance, with feature weighting.
+
+    feat_weights : ndarray
+        The optimal feature weights.
+        Square root of the `w` vector in the oroginal SJM formulation.
+
+    labels_ : Series or ndarray
+        In-sample optimal state assignments.
+
+    proba_ : DataFrame or ndarray
+        In-sample optimal probability matrix.
+
+    ret_, vol_ : Series or ndarray
+        Average return (`ret_`) and volatility (`vol_`) for each state, if `ret_ser` is provided.
+
+    centers_ : ndarray
+        The weighted cluster centers.
     """
+    # reviewed
     def __init__(self,
                  n_components: int = 2, 
-                 n_feats: float = 100.,
-                 jump_penalty: float = 0, 
+                 max_feats: float = 100.,
+                 jump_penalty: float = 0., 
                  cont: bool = False, 
                  grid_size: float = 0.05, 
                  mode_loss: bool = True, 
-                 random_state = None, 
-                 max_iter: int = 10, 
-                 w_tol: float = 1e-4, 
-                 jm_max_iter: int = 1000,
-                 jm_tol: float = 1e-8,
-                 jm_n_init: int = 10,
-                 verbose: bool = False):
-        """
-        Parameters:
-        ----------------------------------
-        n_components: int, default = 2
-            number of components.
-        cont: boolean
-            if True run the continuous jump model. otherwise the discrete model.
-        jump_penalty: float, default = 0.
-            `jump_penalty` is the lambda for both the discrete and continous model.
-        grid_size: float
-            grid size to discretize the probability simplex. only useful for the continuous model.
-        mode_loss: boolean
-            whether to add the mode loss penalty. only useful for the continuous model.
-        covariance_type: [None, "tied_diag", "diag"]
-            The covaraiance mx type:
-            - None: no cov mx structure, squared l2 norm on the raw data is used as the loss function.
-            - "tied_diag": the same diagonal cov mx is imposed on every cluster. Equivalent to first standardize the data matrix, and use squared l2 norm as the loss function.
-            - "diag": learn a diagonal cov mx for every cluster. equivalent to computing the feat std within each cluster, and use it to standardize the data when computing the loss function for the corresponding cluster.
-        random_state:
-
-        max_iter: int, default = 1000
-            maximal number of iteration in each EM algo.    
-        tol: float, default=1e-8.
-            tolerance for the improvement of objective value    
-        n_init: int, default = 10
-            number of different initializations.
-        verbose: boolean
-
-        """
+                 random_state = RANDOM_STATE, 
+                 max_iter: int = 30, 
+                 tol_w: float = 1e-4, 
+                 max_iter_jm: int = 1000,
+                 tol_jm: float = 1e-8,
+                 n_init_jm: int = 20,
+                 verbose: int = 0):
         self.n_components = int(n_components)
-        self.n_feats = n_feats
+        self.max_feats = max_feats
         self.jump_penalty = jump_penalty
         self.cont = cont
         self.grid_size = grid_size
         self.mode_loss = mode_loss
         self.random_state = random_state
         self.max_iter = max_iter
-        self.w_tol = w_tol
-        self.jm_max_iter = jm_max_iter
-        self.jm_tol = jm_tol
-        self.jm_n_init = jm_n_init
+        self.tol_w = tol_w
+        self.max_iter_jm = max_iter_jm
+        self.tol_jm = tol_jm
+        self.n_init_jm = n_init_jm
         self.verbose = verbose
 
+    # reviewed
     def init_jm(self):
         """
-        initialize the JM instance.
+        Initialize the jump model instance with scaled jump penalty.
         """
+        jump_penalty = self.jump_penalty / np.sqrt(self.n_features_all)
         jm = JumpModel(n_components=self.n_components,
-                       jump_penalty=self.jump_penalty,
+                       jump_penalty=jump_penalty,
                        cont=self.cont,
                        grid_size=self.grid_size,
                        mode_loss=self.mode_loss,
                        random_state=self.random_state,
-                       max_iter=self.jm_max_iter,
-                       tol=self.jm_tol,
-                       n_init=self.jm_n_init)
+                       max_iter=self.max_iter_jm,
+                       tol=self.tol_jm,
+                       n_init=self.n_init_jm,
+                       verbose=decre_verbose(self.verbose))
         self.jm_ins = jm
         return jm
     
+    # reviewed
+    def print_log(self, n_iter, BCSS, w):
+        """
+        Print fitting logs if verbosity is enabled.
+        """
+        if self.verbose:
+            print("Iter:", n_iter)
+            print("BCSS:\n", BCSS)     #, "sum:", BCSS.sum()
+            print("w:\n", w, "\n")
+        return 
+
+    # reviewed
     def fit(self, 
             X: DF_ARR_TYPE, 
-            ret_ser: SER_ARR_TYPE = None,
-            sort_by: str = "ret",
-            refit: bool = False):
+            ret_ser: Optional[SER_ARR_TYPE] = None,
+            sort_by: Optional[str] = "cumret"):
+        """
+        Fit the sparse jump model using coordinate descent.
+
+        This method iteratively optimizes the feature weights and fits the jump model 
+        on the weighted data.
+
+        Parameters
+        ----------
+        X : DataFrame or ndarray
+            The input data matrix.
+
+        ret_ser : Series or ndarray, optional
+            A return series used for sorting states.
+
+        sort_by : ["cumret", "vol", "freq", "ret"], optional (default="cumret")
+            Criterion for sorting states.
+
+        Returns
+        -------
+        SparseJumpModel
+            The fitted sparse jump model.
+        """
         #
         X_arr = check_2d_array(X)
-        # get attrs
-        max_iter = self.max_iter
-        w_tol = self.w_tol
-        s = np.sqrt(self.n_feats)
-        # 
-        n_feats_all = X_arr.shape[1]
-        w_old = np.ones(n_feats_all)*2  # invalid weight, just for the 1st iter
-        w = np.ones(n_feats_all) * 1/np.sqrt(n_feats_all)   # initial weight
+        self.n_features_all = X_arr.shape[1]
         # jm ins
         jm = self.init_jm()
+        # get attrs
+        max_iter = self.max_iter
+        tol_w = self.tol_w
+        norm_ub = np.sqrt(self.max_feats)
         # 
+        w_old = np.ones(self.n_features_all)*2  # not a valid weight, only used for entering the 1st iter
+        w = np.ones(self.n_features_all) / np.sqrt(self.n_features_all)  # initial weight   #  np.repeat(1/np.sqrt(self.n_features_all), self.n_features_all)  
         n_iter = 0
-        centers_ = None
-        while (n_iter < max_iter and norm(w-w_old, 1) / norm(w_old, 1) > w_tol):
+        while (n_iter < max_iter and norm(w-w_old, 1) / norm(w_old, 1) > tol_w):
             # 
             n_iter += 1
             w_old = w
-            # fix w, fit JM
+            # Step 1: fix w, fit JM
             feat_weights = np.sqrt(w)
-            if n_iter > 1: jm.centers_ = centers_ * feat_weights
-            jm.fit(X_arr, ret_ser=ret_ser, feat_weights=feat_weights, sort_by=sort_by)
-            centers_ = weighted_mean_cluster(X_arr, jm.proba_, )
-            # solve new w, compute SS on the original data
-            BCSS = compute_BCSS(X_arr, jm.proba_, centers_)
-            if np.isclose(BCSS, 0).all(): break     # all in one cluster
-            w = solve_lasso(BCSS/1e3, s)
-            if self.verbose: print(f"w in iter {n_iter}: ", w)
+            # use the previous optimal center, weighted by the most recent w, as an initialization
+            if n_iter > 1: jm.centers_ = centers_unweighted * feat_weights    
+            # fit JM on weighted data
+            jm.fit(X, ret_ser=ret_ser, feat_weights=feat_weights, sort_by=sort_by)
+            # Step 2: optimize w
+            # update (unweighted) centers
+            centers_unweighted = weighted_mean_cluster(X_arr, jm.proba_)
+            # compute BCSS on the original data
+            BCSS = compute_BCSS(X_arr, jm.proba_, centers_unweighted)
+            if (BCSS <= 0).all(): # all in one cluster
+                self.print_log(n_iter, BCSS, w)
+                break
+            w = solve_lasso(BCSS/BCSS.max(), norm_ub)
+            self.print_log(n_iter, BCSS, w)
         # best res
-        self.w = w
-        if refit:   # retain the feats with non-zero weights.
-            feat_weights = np.zeros(len(w))
-            feat_weights[w > 0] = 1.
-            self.feat_weights = feat_weights
-            # refit jm instance
-            jm.fit(X_arr, ret_ser=ret_ser, feat_weights=feat_weights, sort_by=sort_by)
-        else:
-            self.feat_weights = np.sqrt(w)
-        self.centers_ = weighted_mean_cluster(X_arr, jm.proba_, )
-        self.labels_ = raise_arr_to_pd_obj(jm.labels_, X)
-        self.proba_ = raise_arr_to_pd_obj(jm.proba_, X, return_as_ser=False)
+        self.w = raise_arr_to_pd_obj(w, X, index_key="columns")
+        self.feat_weights = raise_arr_to_pd_obj(jm.feat_weights, X, index_key="columns")
+        self.centers_ = jm.centers_ # weighted centers
+        # self.centers_ = weighted_mean_cluster(X_arr, jm.proba_, )
+        self.labels_ = jm.labels_
+        self.proba_ = jm.proba_
+        if ret_ser is not None:
+            self.ret_ = jm.ret_
+            self.vol_ = jm.vol_
         return self
     
-    def predict_proba(self, X: DF_ARR_TYPE) -> DF_ARR_TYPE:
-        return self.jm_ins.predict_proba(X)
-
-    def predict(self, X: DF_ARR_TYPE) -> SER_ARR_TYPE:
-        return self.jm_ins.predict(X)
-
     def predict_proba_online(self, X: DF_ARR_TYPE) -> DF_ARR_TYPE:
+        """
+        Predict state probabilities in an online fashion.
+        """
         return self.jm_ins.predict_proba_online(X)
     
     def predict_online(self, X: DF_ARR_TYPE) -> SER_ARR_TYPE:
+        """
+        Predict states in an online fashion.
+        """
         return self.jm_ins.predict_online(X)
     
+    def predict_proba(self, X: DF_ARR_TYPE) -> DF_ARR_TYPE:
+        """
+        Predict state probabilities using all available data.
+        """
+        return self.jm_ins.predict_proba(X)
+
+    def predict(self, X: DF_ARR_TYPE) -> SER_ARR_TYPE:
+        """
+        Predict states using all available data.
+        """
+        return self.jm_ins.predict(X)

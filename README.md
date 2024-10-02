@@ -1,6 +1,6 @@
 ![Fitting Example](JM_value_example.png)
 
-*Note: A detailed description of the use of JMs in this figure can be found in* [Examples](#examples).
+*Note: A description of the use of JMs in this figure can be found in* [Examples](#examples).
 
 
 # `jumpmodels`: Python Library for Statistical Jump Models
@@ -37,11 +37,9 @@ pip install ???
 
 - Python 3
 - `numpy` 
+- `pandas`
 - `scipy`
 - `scikit-learn`
-- `pandas`
-- `hmmlearn`
-- `matplotlib`
 
 
 All dependencies can be installed with:
@@ -52,6 +50,10 @@ mamba install pandas scikit-learn hmmlearn matplotlib
 
 Replace `mamba` with `conda` or `pip` if you haven't installed `mamba`.
 
+
+- `matplotlib`
+- `yfinance`
+- `jupyterlab`
 
 ## Usage
 
@@ -66,8 +68,8 @@ from jumpmodels.jump import this
 ## Examples
 
 
-The figure above illustrates an example use of the sparse JM, showing the in-sample fitted regimes for the value factor index’s active performance relative to the market. 
-Further details are available in Shu and Mulvey (2024), as listed in [References](#references-and-citations).
+The figure on top illustrates an example use of the sparse JM, showing the in-sample fitted regimes based on the value factor index’s daily active returns relative to the market. 
+Further details are available in Shu and Mulvey (2024), as listed in [References](#factor).
 
 
 A comprehensive example application using the Nasdaq Composite Price Index series with a simple feature set can be found in the `example/nasdaq` directory.
@@ -97,7 +99,7 @@ If any of them assist your research, please cite the corresponding paper.
 ```
 
 
-- (Original) **Statistical Jump Models**: Nystrup, P., Lindström, E., and Madsen, H. (2020). Learning hidden Markov models with persistent states by penalizing jumps. *Expert Systems with Applications*, 150:113307. [[journal](https://www.sciencedirect.com/science/article/abs/pii/S0957417420301329)] [[OpenAccess](https://orbit.dtu.dk/files/255194701/Learning_hidden_Markov_models_with_persistent_states_by_penalizing_jumps_ACCEPTED_ESWA.pdf)]
+- (Original) **Statistical Jump Models**: Nystrup, P., Lindström, E., and Madsen, H. (2020a). Learning hidden Markov models with persistent states by penalizing jumps. *Expert Systems with Applications*, 150:113307. [[journal](https://www.sciencedirect.com/science/article/abs/pii/S0957417420301329)] [[OpenAccess](https://orbit.dtu.dk/files/255194701/Learning_hidden_Markov_models_with_persistent_states_by_penalizing_jumps_ACCEPTED_ESWA.pdf)]
 
 
 ```bibtex
@@ -131,7 +133,7 @@ If any of them assist your research, please cite the corresponding paper.
 
 
 
-- **Online Inference for JMs**:  Nystrup, P., Kolm, P. N., and Lindström, E. (2020). Greedy online classification of persistent market states using realized intraday volatility features. *The Journal of Financial Data Science*, 2(3):25–39. [[journal](https://www.pm-research.com/content/iijjfds/2/3/25)] [[OpenAccess](https://backend.orbit.dtu.dk/ws/portalfiles/portal/242396317/Greedy_online_classification_of_persistent_market_states_using_realized_intraday_volatility_features.pdf)]
+- **Online Inference for JMs**:  Nystrup, P., Kolm, P. N., and Lindström, E. (2020b). Greedy online classification of persistent market states using realized intraday volatility features. *The Journal of Financial Data Science*, 2(3):25–39. [[journal](https://www.pm-research.com/content/iijjfds/2/3/25)] [[OpenAccess](https://backend.orbit.dtu.dk/ws/portalfiles/portal/242396317/Greedy_online_classification_of_persistent_market_states_using_realized_intraday_volatility_features.pdf)]
 
 ```bibtex
 @article{Nystrup2020onlineJM,
@@ -183,7 +185,7 @@ If any of them assist your research, please cite the corresponding paper.
 
 
 
-- **Dynamic Factor Allocation**: Shu, Y. and Mulvey, J. M. (2024). Dynamic Factor Allocation Leveraging Regime-Switching Signals. [[SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4960484)]
+- <a id="factor"></a> **Dynamic Factor Allocation**: Shu, Y. and Mulvey, J. M. (2024). Dynamic Factor Allocation Leveraging Regime-Switching Signals. [[SSRN](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4960484)]
 
 
 ```bibtex
