@@ -250,8 +250,9 @@ def plot_regimes(regimes: PD_TYPE,
     assert regimes.shape[1]==n_c, "Mismatch between number of components and regime data shape."
     ax = check_axes(ax)
     # color list
-    if colors_regimes is None:
-        colors_regimes = plt.rcParams['axes.prop_cycle'].by_key()['color'][:n_c]
+    if colors_regimes is None:  # generate color list
+        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        colors_regimes = [color_cycle[i % len(color_cycle)] for i in range(n_c)]
     else:
         assert len(colors_regimes) == n_c, "Mismatch between length of color list and number of components. You can input `colors_regimes = None` for colors to be generated authomatically."
     # labels
@@ -323,6 +324,7 @@ def plot_regimes_and_cumret(regimes: PD_TYPE,
     ax = plot_cumret(ret_df, start_date=start_date, end_date=end_date, ax=ax, ylabel_ret=ylabel_ret)
     # plot regimes
     ax2 = ax.twinx()
+    ax2.set(ylabel="Regime")
     plot_regimes(regimes, n_c, start_date=start_date, end_date=end_date, ax=ax2, colors_regimes=colors_regimes, labels_regimes=labels_regimes)
     # merge legneds
     lines, labels = ax.get_legend_handles_labels()

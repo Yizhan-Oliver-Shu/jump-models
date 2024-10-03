@@ -72,7 +72,7 @@ The figure on top illustrates an example use of the sparse JM, showing the in-sa
 Further details are available in Shu and Mulvey (2024), as listed in [References](#factor).
 
 
-A comprehensive example application using the Nasdaq Composite Price Index series with a simple feature set can be found in the `example/nasdaq` directory.
+A comprehensive example application using the daily returns of the Nasdaq-100 Index with a simple feature set can be found in the `example/Nasdaq` directory.
 
 
 

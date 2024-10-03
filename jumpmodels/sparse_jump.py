@@ -242,7 +242,7 @@ class SparseJumpModel(BaseEstimator):
     tol_jm : float, default=1e-8
         Stopping tolerance for the jump model fitting.
 
-    n_init_jm : int, default=20
+    n_init_jm : int, default=10
         Number of initializations for the jump model.
 
     verbose : int, default=0
@@ -282,7 +282,7 @@ class SparseJumpModel(BaseEstimator):
                  tol_w: float = 1e-4, 
                  max_iter_jm: int = 1000,
                  tol_jm: float = 1e-8,
-                 n_init_jm: int = 20,
+                 n_init_jm: int = 10,
                  verbose: int = 0):
         self.n_components = int(n_components)
         self.max_feats = max_feats
