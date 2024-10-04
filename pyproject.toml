@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+
+
+
+[project]
+name = "jumpmodels"
+version = "0.1.1"
+authors = [
+  { name="Yizhan Shu", email="olivershu98@gmail.com" },
+]
+description = "Statistical Jump Models in Python, with `scikit-learn`-style APIs"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+  "numpy",
+  "pandas",
+  "scipy",
+  "scikit-learn",
+  "matplotlib",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+keywords = ["regime", "regime switching", "jump models", "clustering", "time series", "financial data"]
+
+
+
+
+
+[project.optional-dependencies]
+example = [
+    "jupyterlab",
+    "yfinance",
+]
+
+
+
+
+
+
+[project.urls]
+Homepage = "https://github.com/Yizhan-Oliver-Shu/jump-models"
+Issues = "https://github.com/Yizhan-Oliver-Shu/jump-models/issues"

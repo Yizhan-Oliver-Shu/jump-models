@@ -1,25 +1,23 @@
 ![Fitting Example](JM_value_example.png)
 
-*Note: A description of the use of JMs in this figure can be found in* [Examples](#examples).
-
+*Note: An explanation of the application of JMs to the value factor in this figure can be found in the* [Examples](#usage-and-examples) *section.*
 
 # `jumpmodels`: Python Library for Statistical Jump Models
 
 
 `jumpmodels` is a Python library offering a collection of statistical jump models (JMs), an unsupervised algorithm designed for regime identification in time series data. 
 It includes implementations of the original discrete JM, the continuous JM (CJM), and the sparse JM (SJM) with feature selection. 
-The library follows a [`scikit-learn`](https://github.com/scikit-learn/scikit-learn)-style API and supports `pandas.DataFrame` for both input and output.
+The library follows a [`scikit-learn`](https://github.com/scikit-learn/scikit-learn)-style API and supports `pandas` DataFrames for both input and output.
 
 
 
 ---
 
 - [Installation](#installation)
-- [Usage](#usage)
-- [Examples](#examples)
-- [References and Citations](#references-and-citations)
+- [Usage & Examples](#usage-and-examples)
+- [References & Citations](#references-and-citations)
 - [Contributing](#contributing)
-- [Credits and Related Repo](#credits-and-related-repo)
+- [Credits & Related Repo](#credits-and-related-repo)
 - [License](#license)
 
 
@@ -27,52 +25,57 @@ The library follows a [`scikit-learn`](https://github.com/scikit-learn/scikit-le
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install:
+To install the package, use the following [pip](https://pip.pypa.io/en/stable/) command:
 
 ```bash
 pip install jumpmodels
 ```
 
-`jumpmodels` has the following dependencies:
 
-- Python 3
-- `numpy` 
+`jumpmodels` requires the following dependencies:
+
+- Python `(>=3.8)`
+- `numpy`
 - `pandas`
 - `scipy`
 - `scikit-learn`
-
-
-All dependencies can be installed with:
-
-```bash
-mamba install pandas scikit-learn hmmlearn matplotlib
-```
-
-Replace `mamba` with `conda` or `pip` if you haven't installed `mamba`.
-
-
 - `matplotlib`
+
+All dependencies will be installed automatically with the package. While version sensitivity is minimal, an `environment.yaml` file is provided to ensure reproducibility.
+
+To run the example notebook, you will also need the following additional dependencies:
+
 - `yfinance`
 - `jupyterlab`
 
-## Usage
+You can install these along with the package by running:
 
-
-```python
-from jumpmodels.jump import this
-# Add more usage examples later
+```bash
+pip install jumpmodels[example]
 ```
 
 
 
-## Examples
 
 
-The figure on top illustrates an example use of the sparse JM, showing the in-sample fitted regimes based on the value factor index’s daily active returns relative to the market. 
-Further details are available in Shu and Mulvey (2024), as listed in [References](#factor).
+## Usage and Examples
+
+You can import the two core classes, `JumpModel` and `SparseJumpModel`, as follows:
+
+```python
+from jumpmodels.jump import JumpModel                 # JM & CJM class
+from jumpmodels.sparse_jump import SparseJumpModel    # Sparse JM class
+```
+
+We follow a `scikit-learn`-style API, with class methods such as `.fit()`, `.predict()`, `.predict_proba()`, and `.set_params()` for model fitting, state and probability prediction, and resetting model parameters. 
+Specifically designed for time series applications, we also provide `.predict_online()` and `.predict_proba_online()` methods for online prediction.
 
 
-A comprehensive example application using the daily returns of the Nasdaq-100 Index with a simple feature set can be found in the `example/Nasdaq` directory.
+A comprehensive demonstration of the core functionality is available in the `examples/Nasdaq/example.ipynb` notebook, which includes an analysis of the Nasdaq-100 Index using data from [Yahoo Finance](https://finance.yahoo.com/quote/%5ENDX/) (fully public source).
+
+The figure on top features an application of the sparse JM, showing the in-sample identified bull and bear market regimes for the value factor index based on its daily active returns relative to the market. 
+Further details can be found in Shu and Mulvey (2024), as listed in the [References](#factor) section.
+
 
 
 
@@ -201,7 +204,7 @@ If any of them assist your research, please cite the corresponding paper.
 
 ## Contributing
 
-Pull requests are welcome. I am happy to discuss any changes with you. 
+Pull requests and open issues are welcome. I am happy to discuss any related questions.
 
 
 ## Credits and Related Repo
