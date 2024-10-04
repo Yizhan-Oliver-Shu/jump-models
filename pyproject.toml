@@ -11,7 +11,7 @@ version = "0.1.1"
 authors = [
   { name="Yizhan Shu", email="olivershu98@gmail.com" },
 ]
-description = "Statistical Jump Models in Python, with `scikit-learn`-style APIs"
+description = "Statistical Jump Models in Python, with scikit-learn-style APIs"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [

@@ -2,8 +2,9 @@
 
 *Note: An explanation of the application of JMs to the value factor in this figure can be found in the* [Examples](#usage-and-examples) *section.*
 
-# `jumpmodels`: Python Library for Statistical Jump Models
+# **jumpmodels**: Python Library for Statistical Jump Models
 
+[![JumpModels on PyPI](https://img.shields.io/pypi/v/jumpmodels.svg)](https://pypi.org/project/jumpmodels/)
 
 `jumpmodels` is a Python library offering a collection of statistical jump models (JMs), an unsupervised algorithm designed for regime identification in time series data. 
 It includes implementations of the original discrete JM, the continuous JM (CJM), and the sparse JM (SJM) with feature selection. 
