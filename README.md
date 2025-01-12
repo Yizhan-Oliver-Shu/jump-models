@@ -56,7 +56,14 @@ pip install jumpmodels[example]
 ```
 
 
+**Note:**   In addition to the Python package dependencies listed above, the plotting functions in `plot.py` work best with LaTeX installed locally. To enable this:
 
+1. First install a LaTeX distribution such as [MiKTeX](https://miktex.org/download).
+2. Second run `pip install latex` in your Python environment.
+
+Special thanks to [@Peter](https://github.com/peter1357908) for pointing this out in [issue #3](https://github.com/Yizhan-Oliver-Shu/jump-models/issues/3).
+
+If you prefer not to install LaTeX, you can comment out the `matplotlib_setting()` function at the beginning of `plot.py`.
 
 
 ## Usage and Examples
