@@ -23,7 +23,7 @@ def get_data():
     # convert to ret
     ret = close.pct_change()
     # concat as df
-    df = pd.DataFrame({"close": close, "ret": ret}, index=close.index.date)
+    df = pd.DataFrame({"close": close.squeeze(), "ret": ret.squeeze()}, index=close.index.date)
     df.index.name = "date"
 
     # save
